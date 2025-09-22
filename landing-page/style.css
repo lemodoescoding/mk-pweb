@@ -1,0 +1,278 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --section-1-placeholder-offset: 200px;
+  --section-1-side-offset: 100px;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 10vh;
+  background-color: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 3000;
+
+  user-select: none;
+}
+
+header ul {
+  list-style-type: none;
+  margin: 20px;
+}
+
+header ul li {
+  color: #000;
+  display: inline-block;
+  padding: 15px 25px;
+  margin: 0 10px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: bold;
+  font-size: 22px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+header ul li:hover {
+  opacity: 0.6;
+}
+
+header .logo {
+  margin: 20px;
+  color: #fff;
+  font-family: sans-serif;
+  font-size: 30px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+section {
+  height: 100vh;
+  width: 100vw;
+}
+
+.sec-1 {
+  position: relative;
+  /* user-select: none; */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.sec-1 .bg-sec-1 {
+  background: url('./bg-benteng-ked-cowek-2.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  filter: brightness(0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.sec-1 .name-placeholder {
+  width: 50%;
+  height: 100%;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.sec-1 .place-name {
+  color: rgba(255, 255, 255, 1);
+  font-size: 2.5rem;
+  font-weight: 900;
+  font-family: sans-serif;
+  transform: translateY(var(--section-1-placeholder-offset));
+}
+
+.sec-1 .place-alternative {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.3rem;
+  font-weight: 900;
+  font-family: sans-serif;
+  transform: translateY(var(--section-1-placeholder-offset));
+}
+
+.sec-1 .misc {
+  position: relative;
+  width: 50%;
+  height: 100%;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  text-align: right;
+
+  margin: 50px 0;
+  transform: translateY(var(--section-1-side-offset));
+}
+
+.sec-1 .misc .yap {
+  color: rgba(255, 255, 255, 1);
+  font-size: 0.8rem;
+  display: block;
+  width: 60%;
+  margin: 20px;
+}
+
+.sec-1 .misc button {
+  outline: none;
+  border: 2px solid rgba(255, 255, 255, 1);
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 13px;
+  padding: 5px 10px;
+  margin: 5px;
+  color: rgba(255, 255, 255, 1);
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.1s;
+}
+
+.sec-1 .misc button:hover {
+  opacity: 0.6;
+}
+
+.sec-2 {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border-top: 3px solid rgba(0, 0, 0, 1);
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.sec-3 {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  border-top: 3px solid rgba(0, 0, 0, 1);
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.sec-2 .place-description {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 40px;
+  margin: 10px;
+  color: rgba(255, 255, 255, 1);
+}
+
+.sec-2 .place-description > h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 15px 0;
+}
+
+.sec-2 .place-description > h3 {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.sec-2 .sec-2-border {
+  display: block;
+  width: 3px;
+  height: 75%;
+  background-color: rgba(255, 255, 255, 1);
+}
+
+.bg-sec-2,
+.bg-sec-3 {
+  background-size: cover;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+  filter: blur(0px) brightness(0.3);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.sec-2 .photos {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+
+  padding: 100px 20px;
+}
+
+.card {
+  width: 170px;
+  height: 250px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  margin-right: 15px;
+  margin-bottom: 15px;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.5);
+  float: left;
+  overflow: hidden;
+}
+
+.sec-2 .place-description {
+  width: 45%;
+  height: 100%;
+}
+
+.sec-2 .photos {
+  width: 55%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+}
+
+.card .title {
+  width: 100%;
+  min-height: 75%;
+  position: relative;
+}
+
+.card > p {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 1);
+  padding: 10px;
+  font-size: 0.6rem;
+  font-weight: 500;
+}
+
+footer {
+  height: 10vh;
+  width: 100%;
+  background: rgba(7, 48, 36, 0.9);
+}
