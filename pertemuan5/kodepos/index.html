@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
+    <title>Pemrograman WEB B - Pertemuan 5 - Kode Pos</title>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Pencarian Kode Pos</h2>
+      <form id="kodepos-reg">
+        <div class="form-in">
+          <div>
+            <label for="provinsi">Provinsi</label>
+            <select id="provinsi">
+              <option value="">-- Pilih Provinsi --</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="kabkota">Kab/Kota</label>
+            <select id="kabkota" disabled>
+              <option value="">-- Pilih Kab/Kota --</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="kecamatan">Kecamatan</label>
+            <select id="kecamatan" disabled>
+              <option value="">-- Pilih Kecamatan --</option>
+            </select>
+          </div>
+        </div>
+
+        <br />
+        <button type="submit">Cari Kode Pos</button>
+      </form>
+
+      <div id="result" class="result">Testing</div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
