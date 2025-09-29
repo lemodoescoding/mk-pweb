@@ -205,7 +205,8 @@ section {
 }
 
 .bg-sec-2,
-.bg-sec-3 {
+.bg-sec-3,
+.bg-sec-4 {
   background-size: cover;
   background-repeat: no-repeat;
   width: 100%;
@@ -276,3 +277,45 @@ footer {
   width: 100%;
   background: rgba(7, 48, 36, 0.9);
 }
+
+input[type=text], input[type=password], select{
+    width: 100%;
+    padding: 15px;
+    display: inline-block;
+    background-color: #5f5f5f;
+    border: none;
+    border-radius: 7px;
+    margin: 5px 0 22px 0;
+    color: #f4f4f4;
+    box-sizing: border-box;
+}
+
+.submitButton{
+    width: 100%;
+    padding: 15px;
+    background-color: #35e67b;
+    color: #1f1f1f;
+    border: none;
+    border-radius: 3px;
+    margin: 5px 0 22px 0;
+}
+
+.sec-4 {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;   
+  padding-top: 80px;        
+}
+
+.forms {
+  width: 90%;             
+  max-width: 1000px;     
+}
+
+.container {
+  padding: 30px;
+  background-color: #1f1f1f;
+  border-radius: 10px;
+  width: 100%;              
+}
+
