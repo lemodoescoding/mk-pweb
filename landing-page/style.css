@@ -151,7 +151,6 @@ section {
 
 .sec-1 .misc a {
   outline: none;
-  display: block;
   border: 2px solid rgba(255, 255, 255, 1);
   background-color: rgba(0, 0, 0, 0.3);
   border-radius: 13px;
