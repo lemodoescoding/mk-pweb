@@ -4,21 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./style.css" />
-    <title>Document</title>
+    <title>Landing Page - Benteng Kedung Cowek</title>
   </head>
   <body>
     <header>
-      <div class="logo">LOGO</div>
+      <!-- <div class="logo">LOGO</div> -->
       <ul class="links">
-        <li>Home</li>
+        <li><a href="#home">Home</a></li>
         <li>About</li>
-        <li>Fee</li>
-        <li>Schedule</li>
         <li>Contact</li>
       </ul>
     </header>
     <main>
-      <section class="sec-1">
+      <!-- Landing Page and the first header -->
+      <section class="sec-1" id="home">
         <img
           src="./bg-benteng-ked-cowek-2.jpg"
           alt="BG for Section 1"
@@ -40,13 +39,18 @@
             dolorem!
           </p>
           <div class="sec-1-btn">
-            <button class="more" type="button">Learn More</button>
-            <button class="more" type="button">Form Pengunjung</button>
+            <a class="more" href="#learn-more">Learn More</a>
+            <a class="more" href="#daftar">Form Pengunjung</a>
           </div>
+
         </div>
+
+
+          <div class="scroll-down"></div>
       </section>
 
-      <section class="sec-2">
+      <!-- Section 2: Detail and some photos about Benteng Kedung Cowek -->
+      <section class="sec-2" id="learn-more">
         <img src="./bg-benteng-ked-cowek-3.jpg" class="bg-sec-2" />
         <div class="place-description">
           <h1>Ada Benteng Di Surabaya??</h1>
@@ -64,12 +68,19 @@
             quisquam? Deleniti dolor itaque dicta culpa enim quod aspernatur
             cumque, recusandae magni nisi rerum facere nemo aperiam!
           </h3>
+          <div class="place-location">
+
+            <iframe alt="Benteng Kedung Cowek Surabaya Map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5035.39249448608!2d112.78073811155969!3d-7.21566927081916!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7f977c0556c59%3A0xe9e97a7585a7f554!2sBenteng%20Kedung%20Cowek!5e1!3m2!1sen!2sid!4v1758690378924!5m2!1sen!2sid" width="250" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+            <h3>Kedung Cowek, Bulak, Surabaya, East Java 60125</h3>
+
+          </div>
         </div>
         <span class="sec-2-border"></span>
         <div class="photos">
           <div class="card">
             <div class="title">
-              <img src="./" alt="Photos 1" />
+              <img src="./kedung-cowek-8.jpg" alt="Photos 1" />
             </div>
 
             <p class="photo-info">
@@ -79,7 +90,7 @@
           </div>
           <div class="card">
             <div class="title">
-              <img src="./" alt="Photos 2" />
+              <img src="./kedung-cowek-5.jpg" alt="Photos 2" />
             </div>
 
             <p class="photo-info">
@@ -89,7 +100,7 @@
           </div>
         <div class="card">
           <div class="title">
-            <img src="./" alt="Photos 3" />
+            <img src="./kedung-cowek-9.jpg" alt="Photos 3" />
           </div>
 
           <p class="photo-info">
@@ -97,9 +108,9 @@
             assumenda!
           </p>
         </div>
-<div class="card">
+        <div class="card">
           <div class="title">
-            <img src="./" alt="Photos 3" />
+            <img src="./kedung-cowek-10.jpg" alt="Photos 3" />
           </div>
 
           <p class="photo-info">
@@ -107,31 +118,208 @@
             assumenda!
           </p>
         </div>
-<div class="card">
-          <div class="title">
-            <img src="./" alt="Photos 3" />
+          <div class="card">
+            <div class="title">
+              <img src="./kedung-cowek-11.png" alt="Photos 3" />
+            </div>
+
+            <p class="photo-info">
+              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eum,
+              assumenda!
+            </p>
+        </div>
+      </section>
+      <!-- Section: Place Detail -->
+      <section class="sec-2-detail">
+        <img src="./kedung-cowek-8.jpg" class="bg-sec-2-detail" alt="Background Detail" />
+        <div class="place-detail-wrapper">
+          <div class="place-detail-header">
+            <h1>Benteng Kedung Cowek - In-depth Details</h1>
+            <p>Discover what makes this historic site truly unique</p>
           </div>
 
-          <p class="photo-info">
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Eum,
-            assumenda!
-          </p>
+          <div class="place-detail-content">
+            <!-- Left Column: Description -->
+            <div class="place-detail-text">
+              <h2>About Benteng Kedung Cowek</h2>
+              <p>
+                Benteng Kedung Cowek is a historic fortress built during the Dutch colonial period in Surabaya. 
+                Originally used as an ammunition storage, it now stands as a well-preserved cultural heritage site. 
+                Visitors can explore its walls, gates, and old structures while learning about the local history.
+              </p>
+
+              <h3>Uniqueness</h3>
+              <ul>
+                <li>One of the few remaining Dutch fortresses in East Java</li>
+                <li>Architectural features of 17th-century military construction</li>
+                <li>Offers a scenic view of the surrounding Surabaya coastline</li>
+                <li>Hosts occasional cultural events and guided tours</li>
+              </ul>
+
+              <h3>Highlights</h3>
+              <p>
+                Don’t miss the central courtyard, the historic cannons, and the murals that depict the Dutch colonial era. 
+                Photography enthusiasts will love the sunset views from the fort walls.
+              </p>
+            </div>
+
+              <!-- Right Column: Image Gallery -->
+            <div class="place-detail-photos">
+              <div class="card">
+                <div class="title">
+                  <img src="./kedung-cowek-9.jpg" alt="Fort View 1" />
+                </div>
+                <p class="photo-info">View of the fortress walls</p>
+              </div>
+              <div class="card">
+                <div class="title">
+                  <img src="./kedung-cowek-5.jpg" alt="Fort View 2" />
+                </div>
+                <p class="photo-info">Historic cannon display</p>
+              </div>
+              <div class="card">
+                <div class="title">
+                  <img src="./bg-benteng-ked-cowek-2.jpg" alt="Fort View 3" />
+                </div>
+                <p class="photo-info">Sunset view from the fort</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="sec-3">
-        <img src="./bg-benteng-ked-cowek-4.jpg" class="bg-sec-3" />
-        <div class="form-pengunjung">
+      <!-- Section 4 : Testimonial Page -->
+      <section class="sec-4">        
+        <img src="./bg-benteng-ked-cowek-4.jpg" class="bg-sec-4"></img>
+        <div class="testimonial-wrapper">
+          <div class="testimonial-header-wrapper">
+            <div class="testimonial-header">
+              <h1>What People Say</h1>
+              <p>Testimoni dari pengunjung dan wisatawan yang berkunjung ke Benteng Kedung Cowek Surabaya</p>
+            </div>
+            <div class="testimonials">
+              <div class="testimonial-card">
+                <p>"Pengalaman yang sangat menyenangkan, tempatnya bersejarah."</p>
+                <h4>- Andi, Surabaya</h4>
+              </div>
+              <div class="testimonial-card">
+                <p>"Pelayanan ramah dan informatif. Sangat direkomendasikan!"</p>
+                <h4>- Sari, Jakarta</h4>
+              </div>
+              <div class="testimonial-card">
+                <p>"Sungguh menambah wawasan sejarah lokal."</p>
+                <h4>- Budi, Malang</h4>
+              </div>
+              <div class="testimonial-card">
+                <p>"Baru tahu saya kalau ada Benteng di Surabaya, selama ini kita cuma tahu Jembatan Suramadu, eh gak taunya juga ada Benteng peninggalan"</p>
+                <h4>- Alfred, Semarang</h4>
+              </div>
+              <div class="testimonial-card">
+                <p>"Benteng Peninggalan Belanda, Dulunya katanya buat gudang amunisi, beruntung masih ada dan dirawat"</p>
+                <h4>- Sarmen, Situbondo</h4>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-form">
+            <h3>Berikan Komentarmu</h3>
+            <form>
+              <input type="text" placeholder="Your Name" required>
+              <input type="text" placeholder="City/Location" required>
+              <textarea placeholder="Your Testimonial" rows="4" required></textarea>
+              <button type="submit">Submit</button>
+            </form>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Section 7 & 8: Lead Form + FAQ -->
+      <section class="sec-7-8" id="daftar">
+        <img
+          src="./kedung-cowek-11.png"
+          alt="BG for Section 7-8"
+          class="bg-sec-7-8"
+        />
+        <div class="regist-wrapper">
+          <div class="lead-form">
+            <h1>Daftar Tur Sekarang</h1>
+            <form>
+              <input type="text" placeholder="Nama Lengkap" required />
+              <input type="email" placeholder="Email" required />
+              <input type="tel" placeholder="Nomor HP" required />
+              <button type="submit" class="cta-btn">Dapatkan Akses</button>
+            </form>
+          </div>
 
+          <div class="regist-border-mid"></div>
+
+          <div class="faq">
+            <h1>FAQ</h1>
+            <div class="faq-item">
+              <h3>Apakah tur ini cocok untuk anak-anak?</h3>
+            <p>Ya, tur kami ramah anak dan edukatif.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Berapa lama durasi tur?</h3>
+            <p>Rata-rata tur berlangsung sekitar 2 jam.</p>
+          </div>
+          <div class="faq-item">
+            <h3>Bagaimana cara melakukan reservasi?</h3>
+            <p>Anda bisa mendaftar langsung melalui formulir di atas.</p>
+          </div> 
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="visitor-section">
+      <div class="visitor-wrapper">
+        <div class="visitor-form">
+          <h1>Daftar Pengunjung</h1>
+          <form id="visitorForm">
+            <input type="text" id="name" placeholder="Nama Lengkap" required />
+            <input type="email" id="email" placeholder="Email" required />
+            <input type="tel" id="phone" placeholder="Nomor HP" required />
+            <button type="submit">Submit</button>
+          </form>
         </div>
 
-        <div class="pricing"></div>
+        <div class="visitor-list">
+          <h2>Daftar Pengunjung</h2>
+            <table id="visitorTable">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Nama</th>
+                  <th>Email</th>
+                  <th>Nomor HP</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Visitor data will be inserted here dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
       </section>
     </main>
+
     <footer>
-      <p class="copy">
-        Copyright &copy2025-2026 - Pemrograman Web B - 5025241061, 5025241100
-      </p>
+      <div class="footer-container">
+        <div class="footer-contact">
+          <h3>Kontak</h3>
+          <p>Email: iniemail@infokan.com</p>
+          <p>Telepon: +62 812-XXXX-XXXX</p>
+        </div>
+        <div class="footer-social">
+          <h3>Ikuti Kami</h3>
+          <a href="#" target="_blank">Facebook</a>
+          <a href="#" target="_blank">Instagram</a>
+          <a href="#" target="_blank">Twitter</a>
+        </div>
+        <div class="footer-copy">
+          <p>&copy; 2025-2026 - Pemrograman Web B - 5025241061, 5025241100</p>
+        </div>
+      </div>
     </footer>
+    <script src="./script.js"></script>
   </body>
 </html>
