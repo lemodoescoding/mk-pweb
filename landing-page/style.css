@@ -469,7 +469,7 @@ section {
   padding: 30px 50px;
   margin: 0;
   border-top: 3px solid rgba(0, 0, 0, 1);
-
+  overflow: hidden;
 }
 
 .sec-4 .bg-sec-4 {
@@ -529,7 +529,7 @@ section {
 }
 .testimonial-card {
   background: white;
-  padding: 20px;
+  padding: 10px;
   border-radius: 12px;
   max-width: 250px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
