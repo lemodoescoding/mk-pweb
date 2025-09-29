@@ -366,7 +366,7 @@ section {
 
 .sec-2-detail {
   position: relative;
-  padding: 100px 30px;
+  padding: 40px 30px;
   overflow: hidden;
 }
 
@@ -390,13 +390,13 @@ section {
 }
 
 .place-detail-header h1 {
-  font-size: 2rem;
+  font-size: 1.5rem;
   margin-bottom: 10px;
   color: #35e67b;
 }
 
 .place-detail-header p {
-  font-size: 1rem;
+  font-size: .9rem;
   color:rgba(255, 255, 255, 1);
 }
 
@@ -417,6 +417,7 @@ section {
 .place-detail-text h3 {
   margin-top: 20px;
   color: #35e67b;
+  font-size: .85rem;
 }
 
 .place-detail-text p, 
@@ -425,6 +426,7 @@ section {
   color:rgba(255, 255, 255, 1);
   line-height: 1.5;
   text-indent: 10px;
+  font-size: .8rem;;
 
   list-style-type: disc;
 }
