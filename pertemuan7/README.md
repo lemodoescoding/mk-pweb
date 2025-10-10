@@ -13,7 +13,7 @@
 
 #### Run
 1. Go to the pertemuan7/mailer
-2. Run this command, ```bash composer install```
-3. To start the microservice, run ```bash php -S 127.0.0.1:PORT```, specify your PORT, use larger than 3000
+2. Run this command, ```composer install```
+3. To start the microservice, run ```php -S 127.0.0.1:PORT```, specify your PORT, use larger than 3000
 4. Modify the AJAX request on the index.html on `pertemuan7/index.html` on the AJAX script portion, update the port like `http://127.0.0.1:PORT/app/sendmail.php`
 5. And it's done, to stop the service just Ctrl+C the process sendmail.php
