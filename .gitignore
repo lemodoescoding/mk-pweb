@@ -1,0 +1,23 @@
+# PHP
+*.log
+*.tmp
+*.cache
+.env
+
+# Composer dependencies
+vendor/
+
+# Node.js (if you ever add JS packages)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Backup or temp files
+*.bak
+*.swp
