@@ -1,0 +1,41 @@
+* {
+  font-family: sans-serif;
+}
+
+body {
+  min-height: 100vh;
+}
+
+header {
+  max-height: 10vh;
+}
+
+main {
+  min-height: 80vh;
+}
+
+footer {
+  height: 10vh;
+}
+
+.navbar-custom {
+  max-height: 100px;
+}
+
+.navbar-nav-section {
+  width: 60%;
+}
+
+.per-card {
+  min-height: 150px;
+}
+
+.hero-description-p {
+  font-size: 14px;
+}
+
+img {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}

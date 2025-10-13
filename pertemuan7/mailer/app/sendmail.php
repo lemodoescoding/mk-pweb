@@ -6,22 +6,25 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Dotenv\Dotenv;
 
-$dotenv = Dotenv::createImmutable(__DIR__ . "/../");
+$dotenv = Dotenv::createImmutable(__DIR__ . "../");
 $dotenv->load();
 
 
-class MailHandler {
+class MailHandler
+{
   private string $name;
   private string $email;
   private string $message;
 
-  public function __construct(string $name, string $email, string $message) {
+  public function __construct(string $name, string $email, string $message)
+  {
     $this->email = filter_var($email, FILTER_SANITIZE_EMAIL);
     $this->name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
     $this->message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
   }
 
-  public function send(): bool {
+  public function send(): bool
+  {
     $mail = new PHPMailer(true);
 
     try {
@@ -52,29 +55,31 @@ class MailHandler {
       $mail->send();
 
       return true;
-    } catch(Exception $e) {
+    } catch (Exception $e) {
       error_log("Mail error: " . $mail->ErrorInfo);
       return false;
     }
   }
 }
 
-class RequestHandler {
-  public static function handle(): void {
+class RequestHandler
+{
+  public static function handle(): void
+  {
     header("Access-Control-Allow-Origin: *");
     header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
     header("Access-Control-Allow-Headers: Content-Type, X-Requested-With");
 
-    if($_SERVER["REQUEST_METHOD"] === 'OPTIONS'){
+    if ($_SERVER["REQUEST_METHOD"] === 'OPTIONS') {
       http_response_code(200);
       exit();
     }
 
-    if($_SERVER["REQUEST_METHOD"] === 'GET'){
+    if ($_SERVER["REQUEST_METHOD"] === 'GET') {
       echo "Hello, World!";
     }
 
-    if($_SERVER["REQUEST_METHOD"] === 'POST'){
+    if ($_SERVER["REQUEST_METHOD"] === 'POST') {
       $name = $_POST['name'] ?? '';
       $email = $_POST['email'] ?? '';
       $message = $_POST['message'] ?? '';
