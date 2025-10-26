@@ -4,8 +4,10 @@
 
 #### Prerequisite
 
-1. Install PHP on your local system (or alternatively install XAMPP / HTTPd server)
-2. Install phpMyAdmin to the server [phpMyAdmin](https://www.phpmyadmin.net/) -> documentation
+1. Install PHP on your local system
+2. Install Apache/HTTPd or just install XAMPP (Windows) or MAMP (MacOS) or Laragon
+3. Install local MySQL DBMS server (Linux Distro) or just install XAMPP (Windows) or MAMP (MacOS) or Laragon
+4. Install phpMyAdmin to the server [phpMyAdmin](https://www.phpmyadmin.net/) -> documentation
 
 #### Setup
 
