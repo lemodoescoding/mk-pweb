@@ -1,9 +1,11 @@
 <?php
 
-$server = "localhost";
-$user = "root";
-$password = "testingA123_";
-$nama_database = "pendaftaran_siswa";
+// [IMPORTANT] DONT FORGET TO REPLACE OR ADD THE CREDENTIALS BASED ON YOUR CONFIG
+
+$server = "localhost"; //
+$user = ""; // 
+$password = ""; //
+$nama_database = "pendaftaran_siswa"; //
 
 $db = mysqli_connect($server, $user, $password, $nama_database);
 
