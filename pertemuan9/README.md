@@ -12,10 +12,13 @@
 #### Setup
 
 1. Make sure you have already installed the MySQL server using your distro package manager or on Windows just use XAMPP and start the MySQL service from there
-2. Download the phpMyAdmin and copy the folder containing the phpMyAdmin codes (post-extraction) to the root of the APACHE/NGINX/HTTPd
-   2.a. If you are using HTTPD, it is on /var/www/html
-   2.b. If you are using Apache/XAMPP find the where the configuration path are and find a folder named `htdocs`
-   2.c. Paste the folder on them and try to access the phpMyAdmin on the browser (localhost/phpMyAdmin)
+2. Download the phpMyAdmin and copy the folder containing the phpMyAdmin codes (post-extraction) to the root of the APACHE/NGINX/HTTPd&nbsp
+
+   2.a. If you are using HTTPD, it is on /var/www/html&nbsp
+
+   2.b. If you are using Apache/XAMPP find the where the configuration path are and find a folder named `htdocs`&nbsp
+
+   2.c. Paste the folder on them and try to access the phpMyAdmin on the browser (localhost/phpMyAdmin)&nbsp
 
 3. Log in to the phpMyAdmin using your own credential (user and password)
 4. Follow this tutorial just for the setup of the Database and the table [Original Tutorial](https://www.petanikode.com/tutorial-php-mysql/)
