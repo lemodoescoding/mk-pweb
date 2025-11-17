@@ -1,0 +1,70 @@
+CREATE TABLE `siswa` (
+`id` int(11) NOT NULL,
+`nis` varchar(11) NOT NULL,
+`nama` varchar(50) NOT NULL,
+`jenis_kelamin` varchar(10) NOT NULL,
+`telp` varchar(15) NOT NULL,
+`alamat` text NOT NULL,
+`foto` varchar(200) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+<html>
+<head>
+<title>Aplikasi CRUD dengan PHP</title>
+</head>
+<body>
+<h1>Tambah Data Siswa</h1>
+<form method=&quot;post&quot; action=&quot;proses_simpan.php&quot;enctype=&quot;multipart/form-data&quot;>
+<table cellpadding=&quot;8&quot;>
+<tr>
+<td>NIS</td>
+<td><input type=&quot;text&quot; name=&quot;nis&quot;></td>
+</tr>
+<tr>
+<td>Nama</td>
+<td><input type=&quot;text&quot; name=&quot;nama&quot;></td>
+</tr>
+<tr>
+<td>Jenis Kelamin</td>
+<td>
+<input type=&quot;radio&quot; name=&quot;jenis_kelamin&quot; value=&quot;Laki-laki&quot;> Laki-laki
+<input type=&quot;radio&quot; name=&quot;jenis_kelamin&quot;value=&quot;Perempuan&quot;> Perempuan
+</td>
+</tr>
+24. <tr>
+25. <td>Telepon</td>
+26. <td><input type=&quot;text&quot; name=&quot;telp&quot;></td>
+27. </tr>
+28. <tr>
+29. <td>Alamat</td>
+30. <td><textarea name=&quot;alamat&quot;></textarea></td>
+31. </tr>
+32. <tr>
+33. <td>Foto</td>
+34. <td><input type=&quot;file&quot; name=&quot;foto&quot;></td>
+35. </tr>
+36. </table>
+37.
+<hr>
+<input type=&quot;submit&quot; value=&quot;Simpan&quot;>
+<a href=&quot;index.php&quot;><input type=&quot;button&quot;value=&quot;Batal&quot;></a>
+</form>
+</body>
+</html>
+
+Proses_simpan.php
+<?php
+// Load file koneksi.php
+include &quot;koneksi.php&quot;;
+
+// Ambil Data yang Dikirim dari Form
+$nis = $_POST['nis'];
+$nama = $_POST['nama'];
+$jenis_kelamin = $_POST['jenis_kelamin'];
+$telp = $_POST['telp'];
+$alamat = $_POST['alamat'];
+$foto = $_FILES['foto']['name'];
+$tmp = $_FILES['foto']['tmp_name'];
+
+// Rename nama fotonya dengan menambahkan tanggal dan jam upload
+
