@@ -1,5 +1,9 @@
 <?php
-$koneksi = mysqli_connect("localhost", "root", "testingA123_", "user_level");
+
+define("USER", "root");
+define("PASSWORD", "testingA123_");
+
+$koneksi = mysqli_connect("localhost", USER, PASSWORD, "user_level");
 
 // Check connection
 if (mysqli_connect_errno()) {
