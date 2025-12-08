@@ -1,0 +1,199 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Model;
+
+use \PDO;
+
+class Auth extends Model
+{
+  // find data by id
+  public function findById(int $id): ?array
+  {
+    $stmt = $this->db->prepare(
+      "SELECT id, username, email 
+             FROM users 
+             WHERE id = :id LIMIT 1"
+    );
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetch() ?: null;
+  }
+
+  // find user by username or email
+  public function findUser(string $usernameOrEmail): ?array
+  {
+    $sql = "SELECT * FROM users WHERE username = :ue OR email = :ue LIMIT 1";
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(":ue", $usernameOrEmail, PDO::PARAM_STR);
+
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $result ?: null;
+  }
+
+  // check data by username/email exists
+  public function usernameOrEmailExists(string $username, ?string $email): bool
+  {
+    $stmt = $this->db->prepare(
+      "SELECT id 
+             FROM users 
+             WHERE username = :username 
+                OR (email IS NOT NULL AND email = :email)
+             LIMIT 1"
+    );
+    $stmt->bindValue(':username', $username);
+    $stmt->bindValue(':email', $email);
+    $stmt->execute();
+
+    return (bool)$stmt->fetch();
+  }
+
+  // create user
+  public function createUser(string $username, string $email, string $passwordHash): int
+  {
+    $sql = "INSERT INTO users (username, email, password)
+                VALUES (:u, :e, :p)";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->bindValue(":u", $username);
+    $stmt->bindValue(":e", $email);
+    $stmt->bindValue(":p", $passwordHash);
+
+    $stmt->execute();
+
+    return (int) $this->db->lastInsertId();
+  }
+
+  // update remember token (api_token)
+  public function setToken(int $userId, string $tokenHash): bool
+  {
+    $sql = "UPDATE users SET api_token = :t WHERE id = :id";
+    $stmt = $this->db->prepare($sql);
+
+    $stmt->bindValue(":t", $tokenHash, PDO::PARAM_STR);
+    $stmt->bindValue(":id", $userId, PDO::PARAM_INT);
+
+    return $stmt->execute();
+  }
+
+  // find user by token
+  public function findByRememberToken(string $tokenHash): ?array
+  {
+    $sql = "SELECT * FROM users WHERE api_token = :t LIMIT 1";
+    $stmt = $this->db->prepare($sql);
+
+    $stmt->bindValue(":t", $tokenHash, PDO::PARAM_STR);
+    $stmt->execute();
+
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $user ?: null;
+  }
+
+  // verify credential by username/email and password
+  public function verifyLogin(string $usernameOrEmail, string $password): ?array
+  {
+    $user = $this->findUser($usernameOrEmail);
+
+    if (!$user) return null;
+
+    if (!password_verify($password, $user["password"])) {
+      return null;
+    }
+
+    return $user;
+  }
+
+  // find data by token
+  public function findByToken(string $tokenHash): ?array
+  {
+    $stmt = $this->db->prepare(
+      "SELECT id, username, email 
+             FROM users 
+             WHERE api_token = :token LIMIT 1"
+    );
+    $stmt->bindValue(':token', $tokenHash);
+    $stmt->execute();
+
+    return $stmt->fetch() ?: null;
+  }
+
+  // clear token by id
+  public function clearToken(int $userId): void
+  {
+    $stmt = $this->db->prepare(
+      "UPDATE users
+             SET api_token = NULL
+             WHERE id = :id"
+    );
+    $stmt->bindValue(':id', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+  }
+
+  // Fetch all users (admin dashboard)
+  public function getAllUsers(): array
+  {
+    $stmt = $this->db->query(
+      "SELECT id, username, email, role, created_at 
+             FROM users 
+             ORDER BY id DESC"
+    );
+    return $stmt->fetchAll();
+  }
+
+  // Fetch single user by ID (for admin)
+  public function getUserById(int $id): ?array
+  {
+    $stmt = $this->db->prepare(
+      "SELECT id, username, email, role, created_at
+             FROM users 
+             WHERE id = :id LIMIT 1"
+    );
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetch() ?: null;
+  }
+
+  // Promote/demote user
+  public function updateUserRole(int $id, string $role): bool
+  {
+    $stmt = $this->db->prepare(
+      "UPDATE users SET role = :role WHERE id = :id"
+    );
+    $stmt->bindValue(':role', $role);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+    return $stmt->execute();
+  }
+
+  // Delete user
+  public function deleteUser(int $id): bool
+  {
+    $stmt = $this->db->prepare(
+      "DELETE FROM users WHERE id = :id"
+    );
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    return $stmt->execute();
+  }
+
+  // Count users
+  public function countUsers(): int
+  {
+    $stmt = $this->db->query("SELECT COUNT(*) AS total FROM users");
+    $res = $stmt->fetch();
+    return (int)$res['total'];
+  }
+
+  // Count admins
+  public function countAdmins(): int
+  {
+    $stmt = $this->db->query("SELECT COUNT(*) AS total FROM users WHERE role = 'admin'");
+    $res = $stmt->fetch();
+    return (int)$res['total'];
+  }
+}
