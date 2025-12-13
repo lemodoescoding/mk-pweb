@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace App\Controller\Auth;
 
+use App\Controller\BaseAuth;
 use App\Utils\Response;
 use App\Core\DB;
 use App\Enums\StatusCodes;
 use App\Model\Auth as AuthModel;
 
-use \PDO;
-
-class Auth
+class Auth extends BaseAuth
 {
   private AuthModel $auth;
 
@@ -19,19 +18,6 @@ class Auth
   {
     $this->auth = new AuthModel(DB::getInstance());
   }
-
-  // Helper: admin required
-  private function requireAdmin()
-  {
-    $user = $this->getAuthenticatedUser();
-
-    if (!$user || ($user['role'] ?? 'user') !== 'admin') {
-      Response::error("Not Authorized!", StatusCodes::FORBIDDEN);
-    }
-
-    return $user;
-  }
-
 
   private function parseJSON(): array
   {
@@ -47,13 +33,6 @@ class Auth
   // helper: find user by token or session
   private function getAuthenticatedUser(): ?array
   {
-    // 1) Check session
-    if (isset($_SESSION['user_id'])) {
-      $user = $this->auth->findById(intval($_SESSION['user_id']));
-      if ($user) return $user;
-    }
-
-    // 2) Check Authorization header Bearer <token>
     $headers = \getallheaders();
     $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
     if ($authHeader && preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
@@ -87,11 +66,11 @@ class Auth
     }
 
     if ($username === '' || $password === '') {
-      return Response::error("username and password are required", StatusCodes::BAD_REQUEST);
+      return Response::error(null, StatusCodes::BAD_REQUEST, "username and password are required");
     }
 
     if ($password !== $passwordConfirm) {
-      return Response::error("passwords do not match", StatusCodes::BAD_REQUEST);
+      return Response::error(null, StatusCodes::BAD_REQUEST, "passwords do not match");
     }
 
     if ($email !== null && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -99,7 +78,7 @@ class Auth
     }
 
     if ($this->auth->usernameOrEmailExists($username, $email)) {
-      return Response::error("username or email already taken", StatusCodes::CONFLICT);
+      return Response::error(null, StatusCodes::CONFLICT, "username or email already taken");
     }
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
@@ -109,11 +88,8 @@ class Auth
 
       $userId = $this->auth->createUser($username, $email, $passwordHash);
     } catch (\Throwable $e) {
-      return Response::error("failed to create user", StatusCodes::INTERNAL_SERVER_ERROR);
+      return Response::error(null, StatusCodes::INTERNAL_SERVER_ERROR, "failed to create user");
     }
-
-    // Auto-login: create session + issue api token
-    $_SESSION['user_id'] = $userId;
 
     // generate api token and store hashed
     // $rawToken = bin2hex(random_bytes(32));
@@ -140,19 +116,16 @@ class Auth
     $password = (string)($data['password'] ?? '');
 
     if ($usernameOrEmail === '' || $password === '') {
-      return Response::error("username/email and password required", StatusCodes::BAD_REQUEST);
+      return Response::error(null, StatusCodes::BAD_REQUEST, "username/email and password required");
     }
 
     $user = $this->auth->findUser($usernameOrEmail);
 
     if (!$user || !password_verify($password, $user['password'])) {
-      return Response::error("invalid credentials", StatusCodes::UNAUTHORIZED);
+      return Response::error(null, StatusCodes::UNAUTHORIZED, "invalid credentials");
     }
 
     $userId = (int)$user['id'];
-    // set session
-    $_SESSION['user_id'] = $userId;
-
     // generate new api token (rotate)
     $rawToken = bin2hex(random_bytes(32));
     $tokenHash = hash('sha256', $rawToken);
@@ -161,35 +134,37 @@ class Auth
 
     return Response::success([
       'user' => [
-        'id' => $userId,
+        // 'id' => $userId,
         'username' => $user['username'],
         'email' => $user['email'],
+        'placeholder' => $user['placeholder'],
+        'role' => $user['role']
       ],
       'api_token' => $rawToken
     ], StatusCodes::OK, "Login successful");
   }
 
   // GET /api/auth/me
-  public function me()
+  public function me(?array $user = null)
   {
-    $user = $this->getAuthenticatedUser();
-
-    if (!$user) {
-      return Response::error("unauthorized", StatusCodes::UNAUTHORIZED);
-    }
-
-    return Response::success(['user' => $user], StatusCodes::OK, "Authenticated");
+    return Response::success([
+      'username' => $user['username'],
+      'placeholder' => $user['placeholder'],
+      'email' => $user['email'],
+      'role' => $user['role']
+    ], StatusCodes::OK, "Authenticated");
   }
 
   // POST /api/auth/logout
-  public function logout()
+  public function logout(?array $user = null)
   {
-    $user = $this->getAuthenticatedUser();
-    if ($user) {
-      $this->auth->clearToken($user['id']);
-    }
+    // $user = $this->getAuthenticatedUser();
+    // if (!$user) {
+    //   return Response::error("unauthorized", StatusCodes::UNAUTHORIZED);
+    // }
 
-    unset($_SESSION['user_id']);
+    $this->auth->clearToken($user['id']);
+
     session_unset();
     session_destroy();
 

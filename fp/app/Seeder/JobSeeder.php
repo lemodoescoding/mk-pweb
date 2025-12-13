@@ -1,0 +1,188 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Seeder;
+
+// use App\Core\DB;
+use App\Utils\JobsFetcher;
+
+use \PDO;
+
+class JobSeeder
+{
+  private PDO $db;
+
+  public function __construct(PDO $db)
+  {
+    $this->db = $db;
+  }
+
+  public function seed(array $categories, array $countries, int $pages = 1, int $start_page = 1): array
+  {
+    $fetched = JobsFetcher::fetchJSearchJobs($categories, $countries, $pages, $start_page);
+
+    foreach ($fetched as $categoryName => $jobs) {
+      // echo "Processing category: {$categoryName}\n";
+
+      $categoryId = $this->insertCategory($categoryName);
+
+      foreach ($jobs as $job) {
+        $this->storeJob($job, $categoryId);
+      }
+    }
+
+    return $fetched;
+  }
+
+  private function storeJob(array $job, int $categoryId): void
+  {
+    $sourceId   = $this->insertSource('jsearch');
+    $companyId  = $this->insertCompany($job);
+    $locationId = $this->insertLocation($job);
+
+    $jobId = $this->insertJob($job, $companyId, $locationId, $sourceId);
+
+    if ($jobId) {
+      $this->insertJobCategory($jobId, $categoryId);
+    }
+  }
+
+  private function insertSource(string $name): int
+  {
+    $stmt = $this->db->prepare("
+            INSERT IGNORE INTO job_sources (name) VALUES (:name)
+        ");
+    $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+    $stmt->execute();
+
+    return (int) $this->db->lastInsertId() ?: $this->getIdByField('job_sources', 'name', $name);
+  }
+
+  private function insertCompany(array $job): int
+  {
+    $stmt = $this->db->prepare("
+            INSERT INTO companies (name, logo, website)
+            VALUES (:name, :logo, :website)
+            ON DUPLICATE KEY UPDATE logo = VALUES(logo), website = VALUES(website)
+        ");
+
+    $stmt->bindValue(':name', $job['employer_name'], PDO::PARAM_STR);
+    $stmt->bindValue(':logo', $job['employer_logo'], PDO::PARAM_STR);
+    $stmt->bindValue(':website', $job['employer_website'], PDO::PARAM_STR);
+
+    $stmt->execute();
+
+    return (int) $this->db->lastInsertId() ?:
+      $this->getIdByField('companies', 'name', $job['employer_name']);
+  }
+
+  private function insertLocation(array $job): int
+  {
+    $stmt = $this->db->prepare("
+            INSERT INTO locations (city, state, country, lat, lon)
+            VALUES (:city, :state, :country, :lat, :lon)
+            ON DUPLICATE KEY UPDATE id = id
+        ");
+
+    $stmt->bindValue(':city', $job['city'], PDO::PARAM_STR);
+    $stmt->bindValue(':state', $job['state'], PDO::PARAM_STR);
+    $stmt->bindValue(':country', $job['country'], PDO::PARAM_STR);
+    $stmt->bindValue(':lat', $job['lat']);
+    $stmt->bindValue(':lon', $job['lon']);
+
+    $stmt->execute();
+
+    return (int) $this->db->lastInsertId() ?:
+      $this->getLocationId($job);
+  }
+
+  private function insertJob(array $job, int $companyId, int $locationId, int $sourceId): ?int
+  {
+    $stmt = $this->db->prepare("
+            INSERT INTO jobs (
+                external_id, title, description, apply_link, is_remote,
+                company_id, location_id, min_salary, max_salary, salary_period,
+                source_id, date_posted, raw_json
+            ) VALUES (
+                :external_id, :title, :description, :apply_link, :is_remote,
+                :company_id, :location_id, :salary_min, :salary_max, :salary_period,
+                :source_id, :date_posted, :raw_json
+            )
+            ON DUPLICATE KEY UPDATE external_id = external_id
+        ");
+
+    $stmt->bindValue(':external_id', $job['external_id'], PDO::PARAM_STR);
+    $stmt->bindValue(':title', $job['title'], PDO::PARAM_STR);
+    $stmt->bindValue(':description', $job['description'], PDO::PARAM_STR);
+    $stmt->bindValue(':apply_link', json_encode($job['apply_options']));
+    $stmt->bindValue(':is_remote', $job['is_remote'] ? 1 : 0);
+
+    $stmt->bindValue(':company_id', $companyId, PDO::PARAM_INT);
+    $stmt->bindValue(':location_id', $locationId, PDO::PARAM_INT);
+
+    $stmt->bindValue(':salary_min', $job['min_salary'] ?? null);
+    $stmt->bindValue(':salary_max', $job['max_salary'] ?? null);
+    $stmt->bindValue(':salary_period', $job['salary_period'] ?? null);
+
+    $stmt->bindValue(':source_id', $sourceId);
+    $stmt->bindValue(':date_posted', date('Y-m-d H:i:s', $job['posted_at_timestamp']));
+    $stmt->bindValue(':raw_json', json_encode($job, JSON_UNESCAPED_SLASHES));
+
+    $stmt->execute();
+
+    return (int) $this->db->lastInsertId() ?:
+      $this->getIdByField('jobs', 'external_id', $job['external_id']);
+  }
+
+  private function insertCategory(string $name): int
+  {
+    $stmt = $this->db->prepare("
+            INSERT IGNORE INTO categories (name) VALUES (:name)
+        ");
+    $stmt->bindValue(':name', $name, PDO::PARAM_STR);
+    $stmt->execute();
+
+    return (int) $this->db->lastInsertId() ?:
+      $this->getIdByField('categories', 'name', $name);
+  }
+
+  private function insertJobCategory(int $jobId, int $categoryId): void
+  {
+    $stmt = $this->db->prepare("
+            INSERT IGNORE INTO job_categories (job_id, category_id)
+            VALUES (:job, :cat)
+        ");
+
+    $stmt->bindValue(':job', $jobId, PDO::PARAM_INT);
+    $stmt->bindValue(':cat', $categoryId, PDO::PARAM_INT);
+
+    $stmt->execute();
+  }
+
+  private function getIdByField(string $table, string $field, string $value): int
+  {
+    $stmt = $this->db->prepare("SELECT id FROM {$table} WHERE {$field} = :v LIMIT 1");
+    $stmt->bindValue(':v', $value);
+    $stmt->execute();
+
+    return (int) ($stmt->fetchColumn() ?: 0);
+  }
+
+  private function getLocationId(array $job): int
+  {
+    $stmt = $this->db->prepare("
+            SELECT id FROM locations
+            WHERE city = :city AND state = :state AND country = :country
+            LIMIT 1
+        ");
+
+    $stmt->bindValue(':city', $job['city'], PDO::PARAM_STR);
+    $stmt->bindValue(':state', $job['state'], PDO::PARAM_STR);
+    $stmt->bindValue(':country', $job['country'], PDO::PARAM_STR);
+
+    $stmt->execute();
+
+    return (int) ($stmt->fetchColumn() ?: 0);
+  }
+}

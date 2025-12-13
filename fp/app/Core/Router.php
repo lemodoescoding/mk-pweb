@@ -12,6 +12,7 @@ use App\Utils\Response;
 class Router
 {
   private array $routes = [];
+  private array $middlewares = [];
 
   private array $supportedHttpMethod = [
     'GET',
@@ -21,7 +22,11 @@ class Router
     'DELETE'
   ];
 
-  public function add(string $method, string $route, callable|array $handler): self
+  /**
+   * @param callable|array $handler
+   * @param callable[]|null $middlewares
+   */
+  public function add(string $method, string $route, callable|array $handler, ?array $middlewares = null): self
   {
     $method = strtoupper($method);
 
@@ -38,6 +43,8 @@ class Router
       'regex' => "#^" . $regex . "$#",
       'handler' => $handler
     ];
+
+    $this->middlewares[$method][$route] = $middlewares;
 
     return $this;
   }
@@ -62,24 +69,39 @@ class Router
 
         $handler = $route['handler'];
 
-        if(is_callable($handler)) {
-          return call_user_func_array($handler, $matches);
+        $middlewaresResults = [];
+        $routeMiddlewares = $this->middlewares[$method][$route['route']] ?? [];
+
+        foreach ($routeMiddlewares as $md) {
+          $result = call_user_func($md);
+
+          if ($result === false) {
+            return;
+          }
+
+          $middlewaresResults[] = $result;
         }
 
-        if(is_array($handler)) {
+        $args = array_merge($middlewaresResults, $matches) ?? [];
+
+        if (is_callable($handler)) {
+          return call_user_func_array($handler, $args);
+        }
+
+        if (is_array($handler)) {
           [$class, $function] = $handler;
 
-          if(!class_exists($class)) {
+          if (!class_exists($class)) {
             return Response::error(null, StatusCodes::INTERNAL_SERVER_ERROR, "Class Not Found");
           }
 
           $class = new $class();
 
-          if(!method_exists($class, $function)) {
+          if (!method_exists($class, $function)) {
             return Response::error(null, StatusCodes::INTERNAL_SERVER_ERROR, "Method in class not found");
           }
 
-          return call_user_func_array([$class, $function], $matches);
+          return call_user_func_array([$class, $function], $args);
         }
       }
     }

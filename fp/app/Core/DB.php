@@ -10,8 +10,8 @@ use \PDOException;
 
 class DB
 {
-  private static $instance = null;
-  private $pdo;
+  private static ?DB $instance = null;
+  private PDO $pdo;
 
   private function __construct()
   {

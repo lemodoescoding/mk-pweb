@@ -25,9 +25,10 @@ class Auth extends Model
   // find user by username or email
   public function findUser(string $usernameOrEmail): ?array
   {
-    $sql = "SELECT * FROM users WHERE username = :ue OR email = :ue LIMIT 1";
+    $sql = "SELECT * FROM users WHERE username = :u OR email = :e LIMIT 1";
     $stmt = $this->db->prepare($sql);
-    $stmt->bindValue(":ue", $usernameOrEmail, PDO::PARAM_STR);
+    $stmt->bindValue(":e", $usernameOrEmail, PDO::PARAM_STR);
+    $stmt->bindValue(":u", $usernameOrEmail, PDO::PARAM_STR);
 
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -53,15 +54,17 @@ class Auth extends Model
   }
 
   // create user
-  public function createUser(string $username, string $email, string $passwordHash): int
+  public function createUser(string $username, string $email, string $passwordHash, string $type = 'manual'): int
   {
-    $sql = "INSERT INTO users (username, email, password)
-                VALUES (:u, :e, :p)";
+    $sql = "INSERT INTO users (username, email, password, type, placeholder)
+                VALUES (:u, :e, :p, :t, :hl)";
 
     $stmt = $this->db->prepare($sql);
-    $stmt->bindValue(":u", $username);
-    $stmt->bindValue(":e", $email);
-    $stmt->bindValue(":p", $passwordHash);
+    $stmt->bindValue(":u", $username, PDO::PARAM_STR);
+    $stmt->bindValue(":e", $email, PDO::PARAM_STR);
+    $stmt->bindValue(":p", $passwordHash, PDO::PARAM_STR);
+    $stmt->bindValue(":t", $type, PDO::PARAM_STR);
+    $stmt->bindValue(":hl", strtolower(substr($username, 0, (strlen($username) < 8 ? strlen($username) : 8))), PDO::PARAM_STR);
 
     $stmt->execute();
 
@@ -196,4 +199,57 @@ class Auth extends Model
     $res = $stmt->fetch();
     return (int)$res['total'];
   }
+
+  public function findOrCreateFromGoogle(array $googleUser): array
+  {
+    // Use email as primary lookup
+    $email = $googleUser['email'] ?? null;
+
+    if (!$email) {
+      throw new \Exception("Google user email is missing");
+    }
+
+    // Try to find user by email
+    $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email LIMIT 1");
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user) {
+      return $user; // found existing
+    }
+
+    // Create new user if not found
+    $username = $googleUser['name'] ?? explode('@', $email)[0];
+    $passwordHash = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT); // random password
+
+    $stmt = $this->db->prepare(
+      "INSERT INTO users (username, email, password, placeholder, type, avatar) VALUES (:username, :email, :password, :plc, :t, :ava)"
+    );
+    $stmt->bindValue(':username', $username, PDO::PARAM_STR);
+    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
+    $stmt->bindValue(':password', $passwordHash, PDO::PARAM_STR);
+    $stmt->bindValue(':plc', strtolower(substr($username, 0, (strlen($username) < 8 ? strlen($username) : 8))), PDO::PARAM_STR);
+    $stmt->bindValue(':t', 'google', PDO::PARAM_STR);
+    $stmt->bindValue(':ava', $googleUser['picture'], PDO::PARAM_STR);
+    $stmt->execute();
+
+    $userId = (int)$this->db->lastInsertId();
+
+    return $this->findById($userId);
+  }
+
+  public function updateApiToken(int $userId, string $tokenHash): bool
+  {
+    return $this->setToken($userId, $tokenHash);
+  }
+
+    public function countUsersByType(string $type): int
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) AS total FROM users WHERE type = :type");
+        $stmt->bindValue(':type', $type, PDO::PARAM_STR);
+        $stmt->execute();
+        $res = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)$res['total'];
+    }
 }
