@@ -163,81 +163,89 @@ class JobsFetcher
     ];
   }
 
-  private static function multiFetch(array $requests): array
-  {
+private static function multiFetch(array $requests): array
+{
     $cmh = curl_multi_init();
     $handles = [];
     $results = [];
 
     foreach ($requests as $key => $req) {
-      $ch = curl_init();
-      curl_setopt_array($ch, [
-        CURLOPT_URL => $req['url'],
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 30,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => [
-          "x-rapidapi-key: " . Env::get('RAPID_API_KEY')
-        ],
-      ]);
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $req['url'],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 60,         // Increased to 60 seconds
+            CURLOPT_CONNECTTIMEOUT => 10,  // Added connection timeout
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_HTTPHEADER => [
+                "x-rapidapi-key: " . Env::get('RAPID_API_KEY')
+            ],
+        ]);
 
-      curl_multi_add_handle($cmh, $ch);
-      $handles[$key] = $ch;
+        curl_multi_add_handle($cmh, $ch);
+        $handles[$key] = $ch;
     }
 
     do {
-      $status = curl_multi_exec($cmh, $active);
-      curl_multi_select($cmh);
+        $status = curl_multi_exec($cmh, $active);
+        curl_multi_select($cmh);
     } while ($active && $status == CURLM_OK);
 
     $results = [];
 
     foreach ($handles as $key => $ch) {
-      $response = curl_multi_getcontent($ch);
+        $response = curl_multi_getcontent($ch);
 
-      $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-      $err  = curl_error($ch);
+        // Get detailed error information
+        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        $errno = curl_errno($ch); // Get error number for better diagnosis
 
-      curl_multi_remove_handle($cmh, $ch);
-      curl_close($ch);
+        curl_multi_remove_handle($cmh, $ch);
+        curl_close($ch);
 
-      if ($err) {
-        $results[$key] = [
-          [
-            "_error" => "curl_error",
-            "message" => $err
-          ]
-        ];
-        continue;
-      }
+        if ($err) {
+            // This captures timeouts (code 28), connection refused, etc.
+            $results[$key] = [
+                [
+                    "_error" => "curl_error",
+                    "message" => "cURL Error (" . $errno . "): " . $err, // Detailed message
+                    "http_code" => $http,
+                    "body" => $response
+                ]
+            ];
+            continue;
+        }
 
-      if ($http !== 200) {
-        $results[$key] = [
-          [
-            "_error" => "http_error",
-            "http_code" => $http,
-            "body" => $response
-          ]
-        ];
-        continue;
-      }
+        if ($http !== 200) {
+            $results[$key] = [
+                [
+                    "_error" => "http_error",
+                    "http_code" => $http,
+                    "body" => $response
+                ]
+            ];
+            continue;
+        }
+        
+        // ... (Rest of the JSON decoding logic remains the same) ...
+        
+        $json = json_decode($response, true);
 
-      $json = json_decode($response, true);
+        if (!isset($json["data"])) {
+            $results[$key] = [
+                [
+                    "_error" => "no_data",
+                    "body" => $json
+                ]
+            ];
+            continue;
+        }
 
-      if (!isset($json["data"])) {
-        $results[$key] = [
-          [
-            "_error" => "no_data",
-            "body" => $json
-          ]
-        ];
-        continue;
-      }
-
-      $results[$key] = $json["data"] ?? [];
+        $results[$key] = $json["data"] ?? [];
     }
 
     curl_multi_close($cmh);

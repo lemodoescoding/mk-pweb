@@ -11,22 +11,46 @@ use App\Core\DB;
 
 class RequireAuth
 {
+
   public static function getUser(): array | bool
   {
-    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-    if (!preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
-      Response::error(null, StatusCodes::UNAUTHORIZED, "Unauthorized");
-      return false; // stop further execution
+    if (function_exists('getallheaders')) {
+      $headers = getallheaders();
+      $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? $headers['X-Authorization'] ?? null;
+    } else {
+      $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? null;
+    }
+
+    // Check if the header was successfully retrieved
+    if (!$authHeader || !preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+      Response::error([
+        // 'headers' => $headers ?? [],
+        // 'authHeader' => $authHeader ?? '',
+      ], StatusCodes::UNAUTHORIZED, "Unauthorized, missing API Token");
+      return false;
+    }
+    // Check if the header was successfully retrieved
+    if (!$authHeader || !preg_match('/Bearer\s+(.*)$/i', $authHeader, $matches)) {
+      Response::error([
+        'headers' => $headers ?? [],
+        'authHeader' => $authHeader ?? '',
+      ], StatusCodes::UNAUTHORIZED, "Unauthorized, missing API Token");
+      return false;
     }
 
     $token = $matches[1];
+    $tokenHash = hash('sha256', $token);
     $authModel = new Auth(DB::getInstance());
-    $user = $authModel->findByRememberToken(hash('sha256', $token));
+    $user = $authModel->findByRememberToken($tokenHash);
 
-    if($user) 
+    // If token found in DB, return user
+    if ($user)
       return $user;
-    else
+    else {
+      // If token is present but invalid/expired, give a more specific error
+      Response::error(null, StatusCodes::UNAUTHORIZED, "Unauthorized: Invalid or expired token.");
       return false;
+    }
   }
 
   public static function validate(): array | bool
@@ -42,12 +66,12 @@ class RequireAuth
     return $user;
   }
 
-  public static function validateAdmin() : array | bool 
+  public static function validateAdmin(): array | bool
   {
     $user = self::validate();
 
     if (!$user || ($user['role'] ?? 'user') !== 'admin') {
-      Response::error(null, StatusCodes::UNAUTHORIZED, "Unauthorized");
+      Response::error(null, StatusCodes::UNAUTHORIZED, "test");
       return false;
     }
 

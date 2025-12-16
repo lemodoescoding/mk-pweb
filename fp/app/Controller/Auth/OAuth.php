@@ -156,36 +156,56 @@ class OAuth extends BaseAuth
     $user = $this->auth->findOrCreateFromGoogle($googleUser);
 
     $userId = (int)$user['id'];
-    // generate new api token (rotate)
     $rawToken = bin2hex(random_bytes(32));
     $tokenHash = hash('sha256', $rawToken);
 
     $this->auth->setToken($userId, $tokenHash);
+    // return Response::success([
+    //   // 'tokenData' => $tokenData,
+    //   // 'googleUser' => $googleUser
+    //   'user' => [
+    //     // 'id' => $userId,
+    //     'username' => $user['username'],
+    //     'email' => $user['email'],
+    //     'placeholder' => $user['placeholder'],
+    //     'role' => $user['role']
+    //   ],
+    //   'api_token' => $rawToken
+    // ]);
 
-    // TODO: check if user exists in DB and create/login
-    // e.g. $user = $this->auth->findUser($googleUser['email']);
-    // If not exists, create user, then generate api_token
-
-    // For now, just return the info
-    return Response::success([
-      // 'tokenData' => $tokenData,
-      // 'googleUser' => $googleUser
-      'user' => [
-        // 'id' => $userId,
-        'username' => $user['username'],
-        'email' => $user['email'],
-        'placeholder' => $user['placeholder'],
-        'role' => $user['role']
-      ],
-      'api_token' => $rawToken
+    setcookie('api_token', $rawToken, [
+      'expires' => time() + 3600 * 24,
+      'path' => '/',
+      'httponly' => false,
+      'samesite' => 'Lax',
     ]);
+
+    setcookie('role', $user['role'], [
+      'expires' => time() + 3600 * 24,
+      'path' => '/',
+      'httponly' => false,
+      'samesite' => 'Lax',
+    ]);
+
+    $redirect = '/dashboard';
+
+    if ($user['role'] == 'admin') {
+      $redirect = '/admin';
+    }
+
+    header('Location: ' . $redirect);
+
+    return;
   }
 
   public function register()
   {
-    return Response::success([
-      'oauth_uri' => $this->getAuthURL()
-    ], StatusCodes::OK, "Google OAuth URI - Redirect to this");
+    // return Response::success([
+    //   'oauth_uri' => $this->getAuthURL()
+    // ], StatusCodes::OK, "Google OAuth URI - Redirect to this");
+
+    header('Location: ' . $this->getAuthURL());
+    exit;
   }
 
   public function me(?array $user = null)
@@ -206,6 +226,9 @@ class OAuth extends BaseAuth
     // }
 
     $this->auth->clearToken($user['id']);
+
+    setcookie('api_token', '', time() - 3600, '/', '', false, true);
+    setcookie('role', '', time() - 3600, '/', '', false, true);
 
     session_unset();
     session_destroy();

@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Controller\Job;
 
 use App\Core\DB;
+use App\Core\Env;
 use App\Enums\StatusCodes;
 use App\Utils\Response;
 use App\Model\Job as JobModel;
 use App\Model\SavedJobs as SavedJobModel;
 use App\Model\Applications as ApplicationModel;
-use App\Utils\JobsFetcher;
+use App\Model\User as UserModel;
 use App\Seeder\JobSeeder;
 use \PDO;
 
@@ -20,6 +21,7 @@ class Job
   private SavedJobModel $sjb;
   private ApplicationModel $am;
   private JobSeeder $jsd;
+  private UserModel $usm;
   private PDO $db;
 
 
@@ -31,17 +33,19 @@ class Job
 
     $this->db = DB::getInstance();
 
-    $this->jsd = new JobSeeder($this->db);
+    $this->jsd = new JobSeeder(DB::getInstance());
+
+    $this->usm = new UserModel(DB::getInstance());
   }
 
   public function run(): void
   {
-    $stmt = $this->db->query("SELECT jobs_seeded FROM system_state WHERE id = 1");
-    $state = $stmt->fetchColumn();
-
-    if ($state == 1) {
-      return; // do not run again
-    }
+    // $stmt = $this->db->query("SELECT jobs_seeded FROM system_state WHERE id = 1");
+    // $state = $stmt->fetchColumn();
+    //
+    // if ($state == 1) {
+    //   return; // do not run again
+    // }
 
     $countries = [
       "chicago" => "us",
@@ -57,17 +61,45 @@ class Job
 
     // seed categories
     $categories = [
-      "developer" => ["chicago", "london", "washington"],
-      "designer" => ["surabaya", "cardiff"],
+      "developer" => ["chicago", "illinois"],
+      "designer" => ["cardiff"],
       // "marketing" => ["illinois", "copenhagen"],
       // "finance" => ["jakarta"]
     ];
 
-    $pages = 2;
+    $pages = 1;
 
-    $resp = $this->jsd->seed($categories, $countries, $pages);
+    $resp = $this->jsd->seed($categories, $countries, $pages, 2);
 
     Response::success($resp, StatusCodes::OK, "anjai");
+  }
+
+  public function seedJobs(array $data, array $user): void
+  {
+    if (empty($data['categories']) || empty($data['countries']) || !isset($data['pages'])) {
+      Response::error(null, StatusCodes::BAD_REQUEST, "Missing required job seeding parameters (categories, countries, pages, or limit_per_category)");
+      exit;
+    }
+
+    $offset_page = $data['start_page'] ?? 1;
+    $categories = $data['categories'];
+    $countries = $data['countries'];
+    $pages = intval($data['pages']);
+
+    if (!is_array($categories) || !is_array($countries)) {
+      Response::error(null, StatusCodes::BAD_REQUEST, "Categories and countries must be arrays.");
+      exit;
+    }
+
+    try {
+      $resp = $this->jsd->seed($categories, $countries, $pages, $offset_page);
+
+      Response::success($resp, StatusCodes::OK, "Job seeding successful.");
+    } catch (\Throwable $e) {
+      Response::error($e->getMessage(), StatusCodes::INTERNAL_SERVER_ERROR, "Job seeding failed.");
+    }
+
+    exit;
   }
 
   public function indexAll(): void
@@ -81,7 +113,7 @@ class Job
   public function index(int $page = 1): void
   {
     $page = max(1, intval($page));
-    $limit = 20;
+    $limit = intval(Env::get('LIMIT_FETCH_SQL')) ?? 20;
     $offset = ($page - 1) * $limit;
 
     $jobs = $this->jb->getPaginated($limit, $offset);
@@ -106,7 +138,7 @@ class Job
       exit;
     }
 
-    if(isset($job['external_id'])) unset($job['external_id']);
+    if (isset($job['external_id'])) unset($job['external_id']);
 
     Response::success(['job' => $job], StatusCodes::OK, "Return single data");
     exit;
@@ -124,7 +156,7 @@ class Job
   public function searchPaginated($term, $page)
   {
     $page = max(1, intval($page));
-    $limit = 20;
+    $limit = intval(Env::get('LIMIT_FETCH_SQL')) ?? 20;
     $offset = ($page - 1) * $limit;
 
     $jobs = $this->jb->search($term, $limit, $offset);
@@ -156,23 +188,11 @@ class Job
     exit;
   }
 
-  public function apply(int $userId, int $jobId): void
+  public function addJobManual(array $user, array $data): void
   {
-    $apply = $this->am->apply($userId, $jobId);
-
-    if ($apply) {
-      Response::success(null, StatusCodes::OK, "Application submitted.");
-    } else {
-      Response::error(null, StatusCodes::NOT_MODIFIED, "Already applied");
-    }
-
-    exit;
-  }
-
-  public function addJobManual(array $data): void {
     $jobId = $this->jb->inputJob($data);
 
-    if($jobId) {
+    if ($jobId != -1) {
       Response::success(['job_id' => $jobId], StatusCodes::OK, "Job Created");
       exit;
     } else {
@@ -181,10 +201,11 @@ class Job
     }
   }
 
-  public function deleteJob(int $job_id): void {
+  public function deleteJob(array $user, int $job_id): void
+  {
     $successDel = $this->jb->deleteJob($job_id);
 
-    if($successDel) {
+    if ($successDel) {
       Response::success(['deleted_id' => $job_id], StatusCodes::OK, "Job Deleted");
       exit;
     } else {
@@ -193,11 +214,29 @@ class Job
     }
   }
 
-  public function editJob(array $data, int $job_id) {
-    $successEdit = $this->jb->updateJobData($data, $job_id);
+  public function softDeleteJob(int $job_id): void
+  {
+    $successSoftDel = $this->jb->deleteJob($job_id);
 
-
+    if ($successSoftDel) {
+      Response::success(['deleted_id' => $job_id], StatusCodes::OK, "Job Soft Deleted");
+      exit;
+    } else {
+      Response::error(null, StatusCodes::INTERNAL_SERVER_ERROR, "Something went wrong when soft deleting job entry");
+      exit;
+    }
   }
 
-  public function getAllCategory(): void {}
+  public function editJob(array $data, array $user, int $job_id)
+  {
+    $successEdit = $this->jb->updateJobData($data, $user,  $job_id);
+
+    if ($successEdit) {
+      Response::success(['updated_id' => $job_id], StatusCodes::OK, "Job Info Updated!");
+      exit;
+    } else {
+      Response::error(null, StatusCodes::INTERNAL_SERVER_ERROR, "Something went wrong when updating job entry");
+      exit;
+    }
+  }
 }

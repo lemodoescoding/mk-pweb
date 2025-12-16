@@ -1,0 +1,142 @@
+:root {
+  --sidebar-bg: #e0e0e0;
+  --content-bg: #f0f0f0;
+  --card-bg: #d3d3d3;
+  --blue-accent: #3b82f6;
+  --sidebar-width: 300px;
+  --search-bar-height: 100px;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.main-layout {
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background-color: var(--sidebar-bg);
+  overflow-y: hidden;
+}
+
+.bottom-bar {
+  background-color: var(--blue-accent);
+  margin-top: auto;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  color: #888;
+}
+
+.nav-links {
+  padding: 0;
+}
+
+.nav-link {
+  display: block;
+  padding: 10px 0;
+  margin: 0;
+  background-color: transparent;
+  color: #000;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 0;
+  margin-right: 0;
+  padding-left: 1.5rem;
+}
+
+.nav-link.active {
+  background-color: var(--blue-accent);
+  color: white;
+  border-radius: 0;
+}
+
+.bottom-bar {
+  background-color: var(--blue-accent);
+  padding: 0;
+  margin-top: auto;
+}
+
+.bottom-bar a {
+  display: block;
+  text-decoration: none;
+  padding: 10px 1.5rem;
+}
+
+.user-profile {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.bottom-bar {
+  background-color: var(--blue-accent);
+}
+
+.search-bar {
+  position: fixed;
+
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+
+  padding: 1.5rem;
+  z-index: 10;
+  background-color: rgba(240, 240, 240, 0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.search-input {
+  background-color: #d3d3d3;
+  border: none;
+  border-radius: 1.5rem;
+  height: 50px;
+}
+
+.content {
+  background-color: var(--content-bg);
+  flex-grow: 1;
+  overflow-y: scroll;
+
+  height: calc(100vh - var(--search-bar-height));
+
+  margin-top: var(--search-bar-height);
+}
+
+.post-feed {
+  padding-top: 100px;
+  padding-bottom: 100px;
+}
+
+.post-card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  min-height: 250px;
+  margin-bottom: 20px;
+}
+
+.post-card.large {
+  height: 600px;
+}
+
+.post-btn {
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--blue-accent);
+  color: white;
+  font-size: 1.25rem;
+  padding: 10px 20px;
+  border-radius: 50px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+a {
+  text-decoration: none;
+}

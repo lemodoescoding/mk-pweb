@@ -1,0 +1,62 @@
+body {
+    background-color: #f1f1f1; 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.login-card {
+    background-color: #ffffff; 
+    padding: 40px;
+    border-radius: 8px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+    width: 100%;
+    max-width: 400px; 
+}
+
+.footer-bar {
+    background-color: #3b82f6; 
+    height: 100px; 
+    width: 100%;
+    margin-top: auto; 
+}
+
+.form-control {
+    background-color: #e9ecef; 
+    border: 1px solid #ced4da; 
+    height: 50px; 
+}
+
+.btn-submit {
+    background-color: #3b82f6;
+    border-color: #3b82f6; 
+    font-size: 1.1rem;
+    height: 50px;
+}
+
+.text-register {
+    color: #3b82f6 !important; 
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.google-icon {
+    width: 18px; 
+    height: 18px; 
+    margin-right: 5px;
+}
+
+.btn-google {
+    background-color: #ffffff; 
+    color: #000000; 
+    border: 1px solid #ced4da; 
+    font-size: 1rem;
+    height: 50px;
+    transition: background-color 0.2s, border-color 0.2s;
+    font-weight: 500;
+}
+
+.btn-google:hover {
+    background-color: #f8f9fa; 
+    border-color: #adb5bd;
+}

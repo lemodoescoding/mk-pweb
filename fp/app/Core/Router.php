@@ -106,6 +106,7 @@ class Router
       }
     }
 
-    return Response::error(null, StatusCodes::NOT_FOUND, "Route not found");
+    View::error((int) StatusCodes::NOT_FOUND->value);
+    return;
   }
 }

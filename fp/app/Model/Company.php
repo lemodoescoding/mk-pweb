@@ -8,6 +8,13 @@ use \PDO;
 
 class Company extends Model
 {
+  private function getLastInsertedId(): int
+  {
+    $stmt = $this->db->prepare("SELECT id FROM companies ORDER BY id DESC");
+    $stmt->execute();
+
+    return (int) $stmt->fetchColumn();
+  }
   public function firstOrCreate(string $name, string $logo = "", string $website = ""): int
   {
     $stmt = $this->db->prepare("SELECT id FROM companies WHERE name = :name");
@@ -26,7 +33,7 @@ class Company extends Model
     $stmt->bindValue(':website', $website, PDO::PARAM_STR);
     $stmt->execute();
 
-    return (int) $this->db->lastInsertId();
+    return (int) $this->getLastInsertedId();
   }
 
   public function updateCompany(

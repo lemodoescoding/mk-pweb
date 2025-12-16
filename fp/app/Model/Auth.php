@@ -4,15 +4,27 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use App\Model\UserProfile;
+use App\Model\UserJobHistory;
+
 use \PDO;
 
 class Auth extends Model
 {
+  private UserProfile $upf;
+  private UserJobHistory $ujh;
+
   // find data by id
+  public function __construct(PDO $db)
+  {
+    parent::__construct($db);
+    $this->ujh = new UserJobHistory($db);
+    $this->upf = new UserProfile($db);
+  }
   public function findById(int $id): ?array
   {
     $stmt = $this->db->prepare(
-      "SELECT id, username, email 
+      "SELECT *
              FROM users 
              WHERE id = :id LIMIT 1"
     );
@@ -53,6 +65,14 @@ class Auth extends Model
     return (bool)$stmt->fetch();
   }
 
+  private function getLastInsertedUserId(): int
+  {
+    $stmt = $this->db->prepare("SELECT id FROM users ORDER BY id DESC LIMIT 1");
+    $stmt->execute();
+
+    return (int) $stmt->fetchColumn() ?: 0;
+  }
+
   // create user
   public function createUser(string $username, string $email, string $passwordHash, string $type = 'manual'): int
   {
@@ -68,7 +88,13 @@ class Auth extends Model
 
     $stmt->execute();
 
-    return (int) $this->db->lastInsertId();
+    $userId = $this->getLastInsertedUserId();
+
+    if ($userId > 0) {
+      $this->upf->createDefault($userId);
+    }
+
+    return (int) $userId;
   }
 
   // update remember token (api_token)
@@ -224,17 +250,25 @@ class Auth extends Model
     $passwordHash = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT); // random password
 
     $stmt = $this->db->prepare(
-      "INSERT INTO users (username, email, password, placeholder, type, avatar) VALUES (:username, :email, :password, :plc, :t, :ava)"
+      "INSERT INTO users (username, email, password, placeholder, type) VALUES (:username, :email, :password, :plc, :t)"
     );
     $stmt->bindValue(':username', $username, PDO::PARAM_STR);
     $stmt->bindValue(':email', $email, PDO::PARAM_STR);
     $stmt->bindValue(':password', $passwordHash, PDO::PARAM_STR);
     $stmt->bindValue(':plc', strtolower(substr($username, 0, (strlen($username) < 8 ? strlen($username) : 8))), PDO::PARAM_STR);
     $stmt->bindValue(':t', 'google', PDO::PARAM_STR);
-    $stmt->bindValue(':ava', $googleUser['picture'], PDO::PARAM_STR);
+    // $stmt->bindValue(':ava', $googleUser['picture'], PDO::PARAM_STR);
     $stmt->execute();
 
-    $userId = (int)$this->db->lastInsertId();
+    $userId = $this->getLastInsertedUserId();
+
+    if ($userId) {
+      $this->upf->updateOrCreate($userId, [
+        'bio' => 'My Bio',
+        'last_education' => 'Your Education',
+        'photo' => $googleUser['picture']
+      ]);
+    }
 
     return $this->findById($userId);
   }
@@ -244,12 +278,12 @@ class Auth extends Model
     return $this->setToken($userId, $tokenHash);
   }
 
-    public function countUsersByType(string $type): int
-    {
-        $stmt = $this->db->prepare("SELECT COUNT(*) AS total FROM users WHERE type = :type");
-        $stmt->bindValue(':type', $type, PDO::PARAM_STR);
-        $stmt->execute();
-        $res = $stmt->fetch(PDO::FETCH_ASSOC);
-        return (int)$res['total'];
-    }
+  public function countUsersByType(string $type): int
+  {
+    $stmt = $this->db->prepare("SELECT COUNT(*) AS total FROM users WHERE type = :type");
+    $stmt->bindValue(':type', $type, PDO::PARAM_STR);
+    $stmt->execute();
+    $res = $stmt->fetch(PDO::FETCH_ASSOC);
+    return (int)$res['total'];
+  }
 }

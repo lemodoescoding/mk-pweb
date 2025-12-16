@@ -88,7 +88,7 @@ class Auth extends BaseAuth
 
       $userId = $this->auth->createUser($username, $email, $passwordHash);
     } catch (\Throwable $e) {
-      return Response::error(null, StatusCodes::INTERNAL_SERVER_ERROR, "failed to create user");
+      return Response::error($e->getMessage(), StatusCodes::INTERNAL_SERVER_ERROR, "failed to create user");
     }
 
     // generate api token and store hashed
@@ -132,16 +132,40 @@ class Auth extends BaseAuth
 
     $this->auth->setToken($userId, $tokenHash);
 
-    return Response::success([
-      'user' => [
-        // 'id' => $userId,
-        'username' => $user['username'],
-        'email' => $user['email'],
-        'placeholder' => $user['placeholder'],
-        'role' => $user['role']
-      ],
-      'api_token' => $rawToken
-    ], StatusCodes::OK, "Login successful");
+    // return Response::success([
+    //   'user' => [
+    //     // 'id' => $userId,
+    //     'username' => $user['username'],
+    //     'email' => $user['email'],
+    //     'placeholder' => $user['placeholder'],
+    //     'role' => $user['role']
+    //   ],
+    //   'api_token' => $rawToken
+    // ], StatusCodes::OK, "Login successful");
+
+    setcookie('api_token', $rawToken, [
+      'expires' => time() + 3600 * 24,
+      'path' => '/',
+      'httponly' => false,
+      'samesite' => 'Lax',
+    ]);
+
+    setcookie('role', $user['role'], [
+      'expires' => time() + 3600 * 24,
+      'path' => '/',
+      'httponly' => false,
+      'samesite' => 'Lax',
+    ]);
+
+    $redirect = '/dashboard';
+
+    if ($user['role'] == 'admin') {
+      $redirect = '/admin';
+    }
+
+    header('Location: ' . $redirect);
+
+    return;
   }
 
   // GET /api/auth/me
@@ -164,6 +188,9 @@ class Auth extends BaseAuth
     // }
 
     $this->auth->clearToken($user['id']);
+
+    setcookie('api_token', '', time() - 3600, '/', '', false, true);
+    setcookie('role', '', time() - 3600, '/', '', false, true);
 
     session_unset();
     session_destroy();
